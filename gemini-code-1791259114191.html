@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký Dã ngoại</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-blue-600 text-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold"><i class="fa-solid fa-campground mr-2"></i> Đăng Ký Dã Ngoại</h1>
+            <div class="flex gap-2 bg-blue-700 p-1 rounded-lg">
+                <button onclick="switchTab('register')" id="tab-register" class="px-4 py-1 rounded bg-white text-blue-600 font-semibold transition">Đăng ký</button>
+                <button onclick="switchTab('admin')" id="tab-admin" class="px-4 py-1 rounded text-white hover:bg-blue-500 transition">Admin</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- ================= PHẦN ĐĂNG KÝ ================= -->
+        <section id="section-register" class="block">
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-100 max-w-lg mx-auto">
+                <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Phiếu Đăng Ký Tham Gia</h2>
+                
+                <form id="registrationForm" onsubmit="submitForm(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Họ và tên *</label>
+                        <input type="text" id="reg-name" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="VD: Đặng Hữu Trường">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phòng ban/Bộ phận *</label>
+                        <input type="text" id="reg-dept" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="VD: Phòng Nhân sự">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại *</label>
+                        <input type="tel" id="reg-phone" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="09xxxxxxxxx">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ghi chú (Dị ứng thức ăn, ăn chay...)</label>
+                        <textarea id="reg-note" rows="2" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Không có"></textarea>
+                    </div>
+                    
+                    <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition flex justify-center items-center">
+                        <span>Gửi Đăng Ký</span>
+                    </button>
+                </form>
+
+                <!-- Vùng hiển thị thành công (Có QR và Lời chào tự biến mất) -->
+                <div id="successMessage" class="hidden mt-6 text-center animate-fade-in">
+                    <div class="inline-block p-4 bg-green-50 rounded-xl border border-green-200">
+                        <i class="fa-solid fa-circle-check text-4xl text-green-500 mb-2"></i>
+                        <h3 class="text-lg font-bold text-green-700">Đăng ký thành công!</h3>
+                        <p id="greetingText" class="text-green-600 mt-1 font-medium transition-opacity duration-500">Hẹn gặp bạn tại buổi dã ngoại nhé! 👋</p>
+                        <!-- QR Code giả định để quét vào nhóm Zalo/thông tin -->
+                        <div class="mt-4 p-2 bg-white inline-block rounded-lg shadow-sm">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ChaoMungDaNgoai" alt="QR Code" class="w-32 h-32 mx-auto">
+                            <p class="text-xs text-gray-500 mt-2">Quét mã để vào nhóm</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PHẦN ADMIN ================= -->
+        <section id="section-admin" class="hidden">
+            <!-- Khung Đăng nhập Admin -->
+            <div id="admin-login" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 max-w-sm mx-auto mt-10">
+                <h2 class="text-xl font-bold text-center mb-4">Đăng nhập Admin</h2>
+                <input type="password" id="admin-pwd" placeholder="Mật khẩu là: 123456" class="w-full px-4 py-2 border rounded-lg mb-4">
+                <button onclick="checkAdmin()" class="w-full bg-gray-800 text-white font-bold py-2 rounded-lg hover:bg-gray-900">Vào trang quản lý</button>
+            </div>
+
+            <!-- Dashboard Admin (Ẩn cho đến khi đăng nhập) -->
+            <div id="admin-dashboard" class="hidden space-y-6">
+                <!-- Cài đặt API -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold mb-4"><i class="fa-solid fa-link text-blue-500 mr-2"></i> Cài đặt kết nối Google Sheets</h3>
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <input type="text" id="api-url" class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Nhập link Apps Script (https://script.google.com/...)">
+                        <button onclick="saveSettings()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-medium whitespace-nowrap">Lưu cấu hình</button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Mặc định đã trỏ tới link bạn cung cấp. Dữ liệu sẽ lưu ở trình duyệt này.</p>
+                </div>
+
+                <!-- Danh sách đăng ký -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold"><i class="fa-solid fa-users text-green-500 mr-2"></i> Danh sách đăng ký</h3>
+                        <button onclick="loadData()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm font-medium"><i class="fa-solid fa-arrows-rotate mr-1"></i> Làm mới</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-700 text-sm">
+                                    <th class="p-3 border-b">Thời gian</th>
+                                    <th class="p-3 border-b">Họ và tên</th>
+                                    <th class="p-3 border-b">Phòng ban</th>
+                                    <th class="p-3 border-b">SĐT</th>
+                                    <th class="p-3 border-b">Ghi chú</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body" class="text-sm">
+                                <tr><td colspan="5" class="p-4 text-center text-gray-500">Vui lòng bấm "Làm mới" để tải dữ liệu.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // URL mặc định của bạn
+        const DEFAULT_URL = "https://script.google.com/macros/s/AKfycbxUeNxaJLcUJUXo_wroVfGbYz-mneR24syyok7c03TgK9_d--JQowMcSTXhA6AfwDFN/exec";
+
+        // Khởi tạo URL từ localStorage hoặc dùng mặc định
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedUrl = localStorage.getItem("picnicScriptUrl") || DEFAULT_URL;
+            document.getElementById("api-url").value = savedUrl;
+        });
+
+        // 1. Chuyển đổi Tab
+        function switchTab(tab) {
+            document.getElementById('section-register').classList.toggle('hidden', tab !== 'register');
+            document.getElementById('section-admin').classList.toggle('hidden', tab !== 'admin');
+            
+            if(tab === 'register') {
+                document.getElementById('tab-register').className = "px-4 py-1 rounded bg-white text-blue-600 font-semibold transition";
+                document.getElementById('tab-admin').className = "px-4 py-1 rounded text-white hover:bg-blue-500 transition";
+            } else {
+                document.getElementById('tab-admin').className = "px-4 py-1 rounded bg-white text-blue-600 font-semibold transition";
+                document.getElementById('tab-register').className = "px-4 py-1 rounded text-white hover:bg-blue-500 transition";
+            }
+        }
+
+        // 2. Lưu cài đặt URL
+        function saveSettings() {
+            const url = document.getElementById("api-url").value;
+            localStorage.setItem("picnicScriptUrl", url);
+            alert("Đã lưu URL kết nối!");
+        }
+
+        function getScriptUrl() {
+            return document.getElementById("api-url").value || DEFAULT_URL;
+        }
+
+        // 3. Xử lý Gửi Form Đăng ký
+        async function submitForm(e) {
+            e.preventDefault();
+            const btn = document.getElementById("submitBtn");
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Đang gửi...';
+            btn.disabled = true;
+
+            const data = {
+                name: document.getElementById("reg-name").value,
+                department: document.getElementById("reg-dept").value,
+                phone: document.getElementById("reg-phone").value,
+                note: document.getElementById("reg-note").value
+            };
+
+            try {
+                // Gửi dưới dạng text/plain để tránh lỗi CORS Preflight của Google Apps Script
+                await fetch(getScriptUrl(), {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(data)
+                });
+
+                // Hiển thị thành công
+                document.getElementById("registrationForm").reset();
+                document.getElementById("registrationForm").classList.add("hidden");
+                const successDiv = document.getElementById("successMessage");
+                const greeting = document.getElementById("greetingText");
+                
+                successDiv.classList.remove("hidden");
+                greeting.style.opacity = "1";
+
+                // Hẹn giờ biến mất dòng chữ sau 4 giây
+                setTimeout(() => {
+                    greeting.style.opacity = "0";
+                    // Ẩn hẳn sau khi transition CSS hoàn tất
+                    setTimeout(() => { greeting.style.display = "none"; }, 500);
+                }, 4000);
+
+            } catch (error) {
+                alert("Có lỗi xảy ra, vui lòng thử lại!");
+                console.error(error);
+            } finally {
+                btn.innerHTML = 'Gửi Đăng Ký';
+                btn.disabled = false;
+            }
+        }
+
+        // 4. Đăng nhập Admin
+        function checkAdmin() {
+            const pwd = document.getElementById("admin-pwd").value;
+            if (pwd === "123456") { // Mật khẩu mẫu
+                document.getElementById("admin-login").classList.add("hidden");
+                document.getElementById("admin-dashboard").classList.remove("hidden");
+                loadData();
+            } else {
+                alert("Sai mật khẩu!");
+            }
+        }
+
+        // 5. Tải dữ liệu về Admin
+        async function loadData() {
+            const tbody = document.getElementById("table-body");
+            tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>';
+            
+            try {
+                const response = await fetch(getScriptUrl());
+                const rows = await response.json();
+                
+                if (rows.length <= 1) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Chưa có ai đăng ký.</td></tr>';
+                    return;
+                }
+
+                let html = '';
+                // Bỏ qua dòng tiêu đề (index 0)
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    // Format thời gian ngắn gọn
+                    let timeStr = row[0];
+                    if(timeStr) {
+                        const d = new Date(timeStr);
+                        timeStr = isNaN(d) ? row[0] : d.toLocaleString('vi-VN');
+                    }
+                    
+                    html += `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3 whitespace-nowrap text-xs text-gray-500">${timeStr || ''}</td>
+                        <td class="p-3 font-medium">${row[1] || ''}</td>
+                        <td class="p-3">${row[2] || ''}</td>
+                        <td class="p-3">${row[3] || ''}</td>
+                        <td class="p-3 text-gray-500">${row[4] || ''}</td>
+                    </tr>`;
+                }
+                tbody.innerHTML = html;
+
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-500">Lỗi không tải được dữ liệu. Kiểm tra lại Link hoặc quyền truy cập Apps Script.</td></tr>';
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
